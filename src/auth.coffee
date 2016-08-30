@@ -25,6 +25,7 @@
 
 config =
   admin_list: process.env.HUBOT_AUTH_ADMIN
+  read_list: process.env.HUBOT_AUTH_READ
 
 module.exports = (robot) ->
 
@@ -36,9 +37,17 @@ module.exports = (robot) ->
   else
     admins = []
 
+  if config.read_list?
+    readers = config.read_list.split ','
+  else
+    readers = []
+
   class Auth
     isAdmin: (user) ->
       user.id.toString() in admins
+
+    isReader: (user) ->
+      user.id.toString() in readers
 
     hasRole: (user, roles) ->
       userRoles = @userRoles(user)
@@ -59,6 +68,8 @@ module.exports = (robot) ->
       roles = []
       if user? and robot.auth.isAdmin user
         roles.push('admin')
+      if user? and robot.auth.isReader user
+        roles.push('reader')
       if user.roles?
         roles = roles.concat user.roles
       roles
